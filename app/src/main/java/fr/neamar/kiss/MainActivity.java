@@ -674,7 +674,7 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
     }
 
     private UserHandle getPrivateUser() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             final LauncherApps launcher = ContextCompat.getSystemService(this, LauncherApps.class);
             assert launcher != null;
 
@@ -690,7 +690,7 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
     }
 
     private boolean isPrivateSpaceUnlocked(UserHandle privateUser) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             final UserManager manager = ContextCompat.getSystemService(this, UserManager.class);
             return !manager.isQuietModeEnabled(privateUser);
         }
@@ -698,7 +698,7 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
     }
 
     private void switchPrivateSpaceState() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             UserHandle user = getPrivateUser();
             if (user != null) {
                 final UserManager manager = ContextCompat.getSystemService(this, UserManager.class);
@@ -866,143 +866,4 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
      */
     @Override
     public void launchOccurred() {
-        // We selected an item on the list,
-        // now we can cleanup the filter:
-        if (!TextUtils.isEmpty(searchEditText.getText())) {
-            clearSearchText();
-            displayClearOnInput();
-            hideKeyboard();
-        } else if (isViewingAllApps()) {
-            displayKissBar(false);
-        }
-    }
-
-    public void registerPopup(ListPopup popup) {
-        if (mPopup == popup)
-            return;
-        dismissPopup();
-        mPopup = popup;
-        popup.setVisibilityHelper(systemUiVisibilityHelper);
-        popup.setOnDismissListener(() -> MainActivity.this.mPopup = null);
-        hider.fixScroll();
-    }
-
-    @Override
-    public void showDialog(DialogFragment dialog) {
-        final View resultLayout = findViewById(R.id.resultLayout);
-        if (dialog instanceof CustomIconDialog) {
-            // We assume the mResultLayout was visible
-            resultLayout.setVisibility(View.GONE);
-            ((CustomIconDialog) dialog).setOnDismissListener(dlg -> {
-                resultLayout.setVisibility(View.VISIBLE);
-                // force icon reload by searching again; is there any better way?
-                updateSearchRecords();
-            });
-        }
-        dialog.show(getSupportFragmentManager(), "dialog");
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        systemUiVisibilityHelper.onWindowFocusChanged(hasFocus);
-        forwarderManager.onWindowFocusChanged(hasFocus);
-    }
-
-
-    public void showKeyboard() {
-        if (searchEditText.requestFocus()) {
-            searchEditText.setCursorVisible(true);
-            InputMethodManager mgr = ContextCompat.getSystemService(this, InputMethodManager.class);
-            mgr.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
-            systemUiVisibilityHelper.onKeyboardVisibilityChanged(true);
-        }
-    }
-
-    @Override
-    public void hideKeyboard() {
-        // Check if no view has focus:
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager inputManager = ContextCompat.getSystemService(this, InputMethodManager.class);
-            //noinspection ConstantConditions
-            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
-            systemUiVisibilityHelper.onKeyboardVisibilityChanged(false);
-        }
-
-        dismissPopup();
-
-        if (view == searchEditText) {
-            searchEditText.setCursorVisible(false);
-            searchEditText.clearFocus();
-        }
-    }
-
-    @Override
-    public void applyScrollSystemUi() {
-        systemUiVisibilityHelper.applyScrollSystemUi();
-    }
-
-    /**
-     * Check if history / search or app list is visible
-     *
-     * @return true of history, false on app list
-     */
-    public boolean isViewingSearchResults() {
-        return !isDisplayingKissBar;
-    }
-
-    public boolean isViewingAllApps() {
-        return isDisplayingKissBar;
-    }
-
-    public void beforeListChange() {
-        list.prepareChangeAnim();
-    }
-
-    public void afterListChange() {
-        list.animateChange();
-    }
-
-    public void dismissPopup() {
-        if (mPopup != null)
-            mPopup.dismiss();
-    }
-
-    public void showMatchingTags(String tag) {
-        search(Searcher.Type.TAGGED, tag, false);
-
-        clearButton.setVisibility(View.VISIBLE);
-        menuButton.setVisibility(View.INVISIBLE);
-    }
-
-    public void showUntagged() {
-        search(Searcher.Type.UNTAGGED, null, false);
-
-        clearButton.setVisibility(View.VISIBLE);
-        menuButton.setVisibility(View.INVISIBLE);
-    }
-
-    public void showHistory() {
-        search(Searcher.Type.HISTORY, null, false);
-
-        clearButton.setVisibility(View.VISIBLE);
-        menuButton.setVisibility(View.INVISIBLE);
-    }
-
-    public boolean isKissDefaultLauncher() {
-        String homePackage;
-        try {
-            Intent i = new Intent(Intent.ACTION_MAIN);
-            i.addCategory(Intent.CATEGORY_HOME);
-            PackageManager pm = getPackageManager();
-            final ResolveInfo mInfo = pm.resolveActivity(i, PackageManager.MATCH_DEFAULT_ONLY);
-            homePackage = mInfo.activityInfo.packageName;
-        } catch (Exception e) {
-            homePackage = "unknown";
-        }
-
-        return homePackage.equals(this.getPackageName());
-    }
-}
+        // We selected an item on t
