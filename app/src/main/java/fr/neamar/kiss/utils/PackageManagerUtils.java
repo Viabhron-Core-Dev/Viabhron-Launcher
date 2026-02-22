@@ -189,7 +189,6 @@ public class PackageManagerUtils {
         return null;
     }
 
-
     /**
      * @param context       context
      * @param componentName componentName
@@ -334,11 +333,10 @@ public class PackageManagerUtils {
     }
 
     public static boolean isPrivateProfile(@NonNull LauncherApps launcherApps, @NonNull android.os.UserHandle userHandle) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             LauncherUserInfo info = launcherApps.getLauncherUserInfo(userHandle);
             return info != null && UserManager.USER_TYPE_PROFILE_PRIVATE.equalsIgnoreCase(info.getUserType());
         }
         return false;
     }
-
 }
