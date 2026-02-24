@@ -19,6 +19,18 @@
             tools:src="@drawable/ic_launcher" />
 
         <ImageView
+            android:id="@+id/item_app_lock_badge"
+            android:layout_width="?attr/resultNotificationDotSize"
+            android:layout_height="?attr/resultNotificationDotSize"
+            android:layout_gravity="bottom|end"
+            android:contentDescription="@null"
+            android:src="@drawable/lock_badge"
+            android:visibility="gone"
+            tools:layout_height="@dimen/result_notification_dot_size"
+            tools:layout_width="@dimen/result_notification_dot_size"
+            tools:visibility="visible" />
+
+        <ImageView
             android:id="@+id/item_notification_dot"
             android:layout_width="?attr/resultNotificationDotSize"
             android:layout_height="?attr/resultNotificationDotSize"
