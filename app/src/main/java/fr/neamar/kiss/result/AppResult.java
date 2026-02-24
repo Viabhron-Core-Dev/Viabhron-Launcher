@@ -14,7 +14,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.UserManager;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +29,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
 import fr.neamar.kiss.CustomIconDialog;
@@ -80,6 +80,14 @@ public class AppResult extends ResultWithTags<AppPojo> {
             appIcon.setImageDrawable(null);
         }
 
+        // Add lock badge if app is locked
+        if (isAppLocked(context)) {
+            ImageView lockBadge = view.findViewById(R.id.item_app_lock_badge);
+            if (lockBadge != null) {
+                lockBadge.setVisibility(View.VISIBLE);
+            }
+        }
+
         String packageKey = getPackageKey();
 
         SharedPreferences notificationPrefs = context.getSharedPreferences(NotificationListener.NOTIFICATION_PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -111,6 +119,7 @@ public class AppResult extends ResultWithTags<AppPojo> {
         }
         adapter.add(new ListPopup.Item(context, R.string.menu_favorites_remove));
         adapter.add(new ListPopup.Item(context, R.string.menu_tags_edit));
+        adapter.add(new ListPopup.Item(context, R.string.menu_app_lock)); // Add lock option
         if (!pojo.isDisabled()) {
             adapter.add(new ListPopup.Item(context, R.string.menu_app_details));
         }
@@ -186,9 +195,64 @@ public class AppResult extends ResultWithTags<AppPojo> {
         } else if (stringId == R.string.menu_custom_icon) {
             launchCustomIcon(context, parent);
             return true;
+        } else if (stringId == R.string.menu_app_lock) {
+            lockApp(context, parentView);
+            return true;
         }
 
         return super.popupMenuClickHandler(context, parent, stringId, parentView);
+    }
+
+    private void lockApp(Context context, View parentView) {
+        // Check if the app is already locked
+        if (isAppLocked(context)) {
+            // Show a message that the app is already locked
+            Toast.makeText(context, R.string.app_already_locked, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if biometric authentication is available
+        BiometricPrompt biomtericPrompt = new BiometricPrompt((MainActivity) context,
+                ContextCompat.getMainExecutor(context), new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                // Save the locked state
+                saveAppLockedState(context, true);
+                Toast.makeText(context, R.string.app_locked, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                Toast.makeText(context, R.string.authentication_failed, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationError(int errorCode, CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                Toast.makeText(context, errString, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle(context.getString(R.string.lock_app))
+                .setSubtitle(context.getString(R.string.lock_app_subtitle))
+                .setNegativeButtonText(context.getString(android.R.string.cancel))
+                .build();
+
+        biomtericPrompt.authenticate(promptInfo);
+    }
+
+    private boolean isAppLocked(Context context) {
+        // Check if the app is locked
+        // This is a placeholder for the actual implementation
+        return false;
+    }
+
+    private void saveAppLockedState(Context context, boolean isLocked) {
+        // Save the locked state
+        // This is a placeholder for the actual implementation
     }
 
     private void excludeFromHistory(Context context, AppPojo pojo) {
@@ -257,7 +321,7 @@ public class AppResult extends ResultWithTags<AppPojo> {
             dialog.cancel();
 
             final Handler handler = new Handler();
-            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
+            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED), 500);
         });
 
         parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
@@ -365,6 +429,46 @@ public class AppResult extends ResultWithTags<AppPojo> {
 
     @Override
     public void doLaunch(Context context, View v) {
+        // Check if the app is locked
+        if (isAppLocked(context)) {
+            // Show biometric prompt
+            BiometricPrompt biomtericPrompt = new BiometricPrompt((MainActivity) context,
+                    ContextCompat.getMainExecutor(context), new BiometricPrompt.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+                    // Launch the app
+                    launchApp(context, v);
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    Toast.makeText(context, R.string.authentication_failed, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    Toast.makeText(context, errString, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle(context.getString(R.string.unlock_app))
+                    .setSubtitle(context.getString(R.string.unlock_app_subtitle))
+                    .setNegativeButtonText(context.getString(android.R.string.cancel))
+                    .build();
+
+            biomtericPrompt.authenticate(promptInfo);
+            return;
+        }
+
+        // Launch the app
+        launchApp(context, v);
+    }
+
+    private void launchApp(Context context, View v) {
         try {
             LauncherApps launcher = ContextCompat.getSystemService(context, LauncherApps.class);
             assert launcher != null;
