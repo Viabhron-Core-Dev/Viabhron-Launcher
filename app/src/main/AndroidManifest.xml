@@ -39,7 +39,7 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppThemeLight"
+        android:theme="@style/AppThemeDark"
         tools:ignore="GoogleAppIndexingWarning"
         android:supportsRtl="true"
         android:resizeableActivity="true"
@@ -102,7 +102,7 @@
             android:label="@string/activity_setting"
             android:excludeFromRecents="true"
             android:exported="false"
-            android:theme="@style/SettingTheme"
+            android:theme="@style/SettingThemeDark"
             android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
@@ -115,7 +115,7 @@
             android:exported="false"
             android:label="@string/menu_widget_add"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/SettingTheme">
+            android:theme="@style/SettingThemeDark">
         </activity>
         <activity
             android:name=".kustomsupport.AutoFinishTransparentActivity"
