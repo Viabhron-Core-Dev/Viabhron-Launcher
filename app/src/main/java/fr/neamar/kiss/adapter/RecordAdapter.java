@@ -19,6 +19,7 @@ import java.util.Map;
 import fr.neamar.kiss.normalizer.StringNormalizer;
 import fr.neamar.kiss.result.AppResult;
 import fr.neamar.kiss.result.ContactsResult;
+import fr.neamar.kiss.result.FolderResult;
 import fr.neamar.kiss.result.PhoneResult;
 import fr.neamar.kiss.result.Result;
 import fr.neamar.kiss.result.SearchResult;
@@ -52,7 +53,7 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
 
     @Override
     public int getViewTypeCount() {
-        return 6;
+        return 7; // Added FolderResult
     }
 
     @Override
@@ -69,6 +70,8 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
             return 4;
         else if (results.get(position) instanceof ShortcutsResult)
             return 5;
+        else if (results.get(position) instanceof FolderResult)
+            return 6;
         else
             return -1;
     }
@@ -151,7 +154,6 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
         parent.updateTranscriptMode(transcriptMode);
     }
 
-
     public void clear() {
         this.results.clear();
         notifyDataSetChanged();
@@ -226,5 +228,21 @@ public class RecordAdapter extends BaseAdapter implements SectionIndexer {
 
     public void showDialog(DialogFragment dialog) {
         parent.showDialog(dialog);
+    }
+
+    // Folder-specific methods
+    public void createFolder(String folderName, List<Result<?>> apps) {
+        results.add(new FolderResult(folderName, apps));
+        notifyDataSetChanged();
+    }
+
+    public void addAppToFolder(FolderResult folder, Result<?> app) {
+        folder.addApp(app);
+        notifyDataSetChanged();
+    }
+
+    public void removeAppFromFolder(FolderResult folder, Result<?> app) {
+        folder.removeApp(app);
+        notifyDataSetChanged();
     }
 }
