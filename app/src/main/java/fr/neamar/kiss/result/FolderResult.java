@@ -1,8 +1,12 @@
 package fr.neamar.kiss.result;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,7 +40,7 @@ public class FolderResult extends Result<List<Result<?>>> {
 
     @Override
     public void launch(@NonNull Context context, View v, RecordAdapter parent) {
-        // TODO: Open folder popup
+        showFolderPopup(context, parent);
     }
 
     @Override
@@ -72,5 +76,40 @@ public class FolderResult extends Result<List<Result<?>>> {
 
     public void removeApp(Result<?> app) {
         getData().remove(app);
+    }
+
+    private void showFolderPopup(Context context, RecordAdapter parent) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_folder, null);
+
+        TextView folderNameView = dialogView.findViewById(R.id.folder_name);
+        folderNameView.setText(folderName);
+        folderNameView.setOnClickListener(v -> showEditNameDialog(context, parent));
+
+        builder.setView(dialogView)
+                .setTitle(R.string.folder_contents)
+                .setPositiveButton(R.string.ok, null);
+
+        builder.create().show();
+    }
+
+    private void showEditNameDialog(Context context, RecordAdapter parent) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_edit_folder_name, null);
+
+        EditText editText = dialogView.findViewById(R.id.edit_folder_name);
+        editText.setText(folderName);
+
+        builder.setView(dialogView)
+                .setTitle(R.string.edit_folder_name)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    setFolderName(editText.getText().toString());
+                    parent.notifyDataSetChanged();
+                })
+                .setNegativeButton(R.string.cancel, null);
+
+        builder.create().show();
     }
 }
