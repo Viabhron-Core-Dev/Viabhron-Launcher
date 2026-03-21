@@ -23,6 +23,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,6 +53,8 @@ import fr.neamar.kiss.broadcast.IncomingCallHandler;
 import fr.neamar.kiss.dataprovider.simpleprovider.SearchProvider;
 import fr.neamar.kiss.forwarder.ForwarderManager;
 import fr.neamar.kiss.pojo.SearchPojo;
+import fr.neamar.kiss.result.AppResult;
+import fr.neamar.kiss.result.FolderResult;
 import fr.neamar.kiss.result.Result;
 import fr.neamar.kiss.searcher.QueryInterface;
 import fr.neamar.kiss.searcher.SearchHandler;
@@ -163,6 +166,10 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
     private Permission permissionManager;
     private OnBackPressedCallback onBackPressedCallback;
 
+    // Folder drag-and-drop support
+    private Result<?> draggedItem = null;
+    private int draggedPosition = -1;
+
     /**
      * Called when the activity is first created.
      */
@@ -264,6 +271,34 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
         this.list.setLongClickable(true);
         this.list.setOnItemLongClickListener((parent, v, pos, id) -> {
             ((RecordAdapter) parent.getAdapter()).onLongClick(pos, v);
+            return true;
+        });
+
+        // Set up drag-and-drop for folders
+        this.list.setOnItemLongClickListener((parent, v, pos, id) -> {
+            draggedItem = (Result<?>) parent.getAdapter().getItem(pos);
+            draggedPosition = pos;
+            v.startDrag(null, new View.DragShadowBuilder(v), null, 0);
+            return true;
+        });
+
+        this.list.setOnDragListener((v, event) -> {
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DROP:
+                    int targetPosition = list.pointToPosition((int) event.getX(), (int) event.getY());
+                    if (targetPosition != -1 && targetPosition != draggedPosition) {
+                        Result<?> targetItem = (Result<?>) list.getAdapter().getItem(targetPosition);
+                        if (targetItem instanceof AppResult && draggedItem instanceof AppResult) {
+                            List<Result<?>> folderContents = new ArrayList<>();
+                            folderContents.add(draggedItem);
+                            folderContents.add(targetItem);
+                            adapter.createFolder("New Folder", folderContents);
+                            adapter.removeResult(MainActivity.this, draggedItem);
+                            adapter.removeResult(MainActivity.this, targetItem);
+                        }
+                    }
+                    break;
+            }
             return true;
         });
 
@@ -449,7 +484,6 @@ public class MainActivity extends AppCompatActivity implements QueryInterface, K
 
         super.onResume();
     }
-
 
     @Override
     protected void onPause() {
