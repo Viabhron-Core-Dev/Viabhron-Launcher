@@ -1,10 +1,24 @@
 package fr.neamar.kiss.pojo;
 
+import java.util.List;
+
+/**
+ * Represents the manifest of a Viabhron plugin.
+ */
 public class PluginManifest {
     private String name;
     private String version;
-    private String[] permissions;
+    private List<String> permissions;
     private String description;
+
+    public PluginManifest() {}
+
+    public PluginManifest(String name, String version, List<String> permissions, String description) {
+        this.name = name;
+        this.version = version;
+        this.permissions = permissions;
+        this.description = description;
+    }
 
     public String getName() {
         return name;
@@ -22,11 +36,11 @@ public class PluginManifest {
         this.version = version;
     }
 
-    public String[] getPermissions() {
+    public List<String> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(String[] permissions) {
+    public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
     }
 
@@ -36,5 +50,15 @@ public class PluginManifest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "PluginManifest{" +
+                "name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", permissions=" + permissions +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
